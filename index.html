@@ -77,7 +77,7 @@ button {
   flex: 1;
 }
 
-/* ===== 설정 팝업 (휴식 입력 추가) ===== */
+/* ===== 설정 팝업 ===== */
 .popup, .stats-popup {
   display:none;
   margin-top:10px;
@@ -182,29 +182,30 @@ button {
 
 <script>
 const CIRC = 2 * Math.PI * 65; 
-let mode="focus", interval=null, total=0, elapsed=0, color="#ff6b6b";
-let currentFocus = 0, currentBreak = 0; // 현재 선택된 설정값 저장
+const BREAK_COLOR = "#87eaf2"; // 휴식 모드 고정 색상 (민트)
+let mode="focus", interval=null, total=0, elapsed=0, userColor="#ff6b6b";
+let currentFocus = 0, currentBreak = 0;
 let focusStats = JSON.parse(localStorage.getItem("focusStats")||"{}");
 
 function update(){
-  const remain = total - elapsed;
-  const m = Math.floor(Math.max(0, remain) / 60).toString().padStart(2,'0');
-  const s = (Math.max(0, remain) % 60).toString().padStart(2,'0');
-  
+  // 남은 시간이 아닌 '경과 시간'을 표시 (분:초)
+  const m = Math.floor(elapsed / 60).toString().padStart(2,'0');
+  const s = (elapsed % 60).toString().padStart(2,'0');
   document.getElementById("time").innerText = m + ":" + s;
   
   const prg = document.getElementById("prg");
-  prg.style.stroke = color;
+  // 모드에 따라 색상 자동 변경
+  prg.style.stroke = (mode === "focus") ? userColor : BREAK_COLOR;
   
-  if (total === 0 || elapsed === 0) {
+  if (total === 0) {
     prg.style.strokeDashoffset = CIRC;
   } else {
+    // 테두리는 여전히 '진행률'을 시각적으로 보여줌
     const offset = CIRC * (1 - elapsed / total);
     prg.style.strokeDashoffset = offset;
   }
 }
 
-// ===== 자동 전환 로직이 포함된 타이머 기능 =====
 function start(){
   if(interval || total === 0) return;
   document.getElementById("mode").innerText = mode === "focus" ? "집중 중" : "휴식 중";
@@ -212,31 +213,25 @@ function start(){
   interval = setInterval(() => {
     elapsed++;
     update();
+    
     if(elapsed >= total){
-      pause();
+      // 알림 없이 즉시 다음 모드로 전환
       if(mode === "focus"){
-        // 집중 완료 시
         const t = document.getElementById("title").innerText;
         focusStats[t] = (focusStats[t]||0) + Math.floor(total/60);
         localStorage.setItem("focusStats", JSON.stringify(focusStats));
         renderStats();
-        alert("집중 완료! 휴식을 시작합니다.");
         
-        // 휴식 모드로 전환 및 자동 시작
         mode = "break";
         total = currentBreak * 60;
         elapsed = 0;
-        update();
-        start(); 
       } else {
-        // 휴식 완료 시
-        alert("휴식 완료! 다시 집중을 시작합니다.");
         mode = "focus";
         total = currentFocus * 60;
         elapsed = 0;
-        update();
-        start();
       }
+      document.getElementById("mode").innerText = mode === "focus" ? "집중 중" : "휴식 중";
+      update();
     }
   }, 1000);
 }
@@ -269,11 +264,10 @@ function renderPresets(){
     div.className = "saved-item";
     const b = document.createElement("button");
     b.style.background = p.color;
-    // 리스트에 집중/휴식 시간 모두 표시
     b.innerText = `${p.title} (집중:${p.focus}분 / 휴식:${p.break}분)`;
     b.onclick = () => {
       document.getElementById("title").innerText = p.title;
-      color = p.color;
+      userColor = p.color;
       currentFocus = p.focus;
       currentBreak = p.break;
       total = currentFocus * 60;
