@@ -13,29 +13,27 @@
 
 body {
   margin: 0;
-  padding: 10px;
+  padding: 4px;
   font-family: 'KyoboHandwriting2019', sans-serif;
   background: #f7f7f7;
-  width: 100%;
   box-sizing: border-box;
 }
 
-/* =====================
-   타이머 영역
-===================== */
+/* ===== 카드 ===== */
 .timer-box {
   width: 100%;
-  max-width: 260px;
+  max-width: 220px;
   margin: 0 auto;
   background: white;
-  border-radius: 14px;
-  padding: 12px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.08);
 }
 
+/* ===== 타이머 ===== */
 .timer-circle {
-  width: 140px;
-  height: 140px;
+  width: 110px;
+  height: 110px;
   margin: 0 auto;
   border-radius: 50%;
   background: var(--timer-color, #82C6E2);
@@ -43,30 +41,28 @@ body {
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 18px;
+  font-size: 14px;
   text-align: center;
 }
 
-/* 중앙 텍스트 */
-.timer-circle span {
-  display: block;
-  line-height: 1.2;
+.timer-circle strong {
+  font-size: 16px;
 }
 
-/* =====================
-   버튼
-===================== */
+/* ===== 버튼 ===== */
 .controls {
   display: flex;
-  justify-content: space-between;
-  margin-top: 10px;
+  gap: 4px;
+  margin-top: 6px;
 }
 
 button {
+  flex: 1;
   font-family: 'KyoboHandwriting2019';
   border: none;
-  border-radius: 8px;
-  padding: 6px 10px;
+  border-radius: 6px;
+  padding: 4px 0;
+  font-size: 12px;
   cursor: pointer;
 }
 
@@ -74,61 +70,57 @@ button {
 .stop-btn { background: #ff6b6b; color: white; }
 .save-btn { background: #74c0fc; color: white; }
 
-/* =====================
-   누적 기록
-===================== */
+/* ===== 누적 기록 ===== */
 .stats {
-  margin-top: 12px;
-  font-size: 13px;
+  margin-top: 6px;
+  font-size: 11px;
 }
 
 .stat-row {
   display: flex;
   align-items: center;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .stat-name {
-  width: 70px;
+  width: 52px;
 }
 
 .stat-bar {
   flex: 1;
-  height: 10px;
+  height: 8px;
   background: #e9ecef;
   border-radius: 6px;
   overflow: hidden;
-  margin: 0 6px;
+  margin: 0 4px;
 }
 
 .stat-fill {
   height: 100%;
-  width: 0%;
   background: var(--timer-color);
 }
 
 .stat-time {
-  width: 38px;
+  width: 30px;
   text-align: right;
-  font-size: 12px;
+  font-size: 10px;
 }
 
 .no-stats {
   color: #868e96;
   text-align: center;
-  margin: 6px 0;
+  font-size: 11px;
 }
 
-/* =====================
-   리셋 버튼
-===================== */
+/* ===== 리셋 ===== */
 .clear-btn {
   width: 100%;
-  margin-top: 8px;
+  margin-top: 4px;
   background: #ff8787;
   color: white;
-  padding: 6px;
-  border-radius: 8px;
+  padding: 4px 0;
+  font-size: 11px;
+  border-radius: 6px;
 }
 </style>
 </head>
@@ -136,19 +128,16 @@ button {
 <body>
 
 <div class="timer-box">
-  <!-- 타이머 -->
   <div class="timer-circle" id="timerCircle">
     <span>뽀모도로<br><strong id="timeText">25:00</strong></span>
   </div>
 
-  <!-- 버튼 -->
   <div class="controls">
     <button class="start-btn" onclick="startTimer()">시작</button>
     <button class="stop-btn" onclick="stopTimer()">정지</button>
     <button class="save-btn" onclick="saveSession()">저장</button>
   </div>
 
-  <!-- 누적 기록 -->
   <div class="stats" id="statsArea"></div>
 
   <button class="clear-btn" onclick="clearStats()">누적 기록 초기화</button>
