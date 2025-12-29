@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Pomodoro</title>
+
+<style>
+@font-face {
+  font-family: 'KyoboHandwriting2019';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/KyoboHandwriting2019.woff') format('woff');
+}
+
+body {
+  font-family: 'KyoboHandwriting2019', -apple-system;
+  background:#f6f6f6;
+  text-align:center;
+  padding:24px;
+}
+
+input, button {
+  font-family: 'KyoboHandwriting2019';
+  padding:6px;
+  margin:4px;
+}
+
+.circle {
+  width:220px; height:220px;
+  margin:20px auto; position:relative;
+}
+
+svg { transform: rotate(-90deg); }
+.bg { fill:none; stroke:#e9ecef; stroke-width:12; }
+.progress {
+  fill:none; stroke-width:12;
+  stroke-dasharray:628; stroke-dashoffset:628;
+  transition:stroke-dashoffset 1s linear, stroke 0.3s;
+}
+
+.center {
+  position:absolute; top:50%; left:50%;
+  transform:translate(-50%,-50%);
+}
+
+.title { font-size:16px; }
+.time { font-size:34px; }
+.mode { font-size:14px; }
+
+button {
+  border:none; border-radius:6px; cursor:pointer;
+}
+
+.start { background:#ff6b6b; color:white; }
+.pause { background:#4dabf7; color:white; }
+.reset { background:#868e96; color:white; }
+
+.toggle { margin-top:12px; background:#dee2e6; }
+
+.popup {
+  display:none; background:white;
+  padding:12px; border-radius:8px;
+  margin-top:10px;
+}
+
+.saved { margin-top:20px; text-align:left; }
+.saved-item {
+  display:flex; gap:6px; margin-bottom:6px;
+}
+
+.stats-popup {
+  display:none;
+  background:white;
+  padding:14px;
+  border-radius:8px;
+  margin-top:12px;
+}
+
+.bar-row {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:8px;
+}
+
+.bar {
+  height:18px;
+  border-radius:6px;
+}
+
+.clear-btn {
+  background:#ff8787;
+  color:white;
+  margin-top:10px;
+}
+</style>
+</head>
+
+<body>
+
+<h2>🍅 Pomodoro</h2>
+
+<div class="circle">
+<svg width="220" height="220">
+  <circle class="bg" cx="110" cy="110" r="100"/>
+  <circle class="progress" cx="110" cy="110" r="100"/>
+</svg>
+
+<div class="center">
+  <div class="title" id="title">타이머</div>
+  <div class="time" id="time">00:00</div>
+  <div class="mode" id="mode">대기 중</div>
+</div>
+</div>
+
+<button class="start" onclick="start()">Start</button>
+<button class="pause" onclick="pause()">Pause</button>
+<button class="reset" onclick="reset()">Reset</button>
+
+<br>
+
+<button class="toggle" onclick="toggleSave()">타이머 저장 ▼</button>
+<button class="toggle" onclick="toggleStats()">누적 집중시간 ▼</button>
+
+<div class="popup" id="savePopup">
+  <input id="saveTitle" placeholder="타이머 제목"><br>
+  집중 <input id="saveFocus" type="number" min="1" value="25"> 분<br>
+  휴식 <input id="saveBreak" type="number" min="1" value="5"> 분<br>
+  색상 <input id="saveColor" value="#ff6b6b"><br>
+  <button onclick="savePreset()">저장</button>
+</div>
+
+<div class="stats-popup" id="statsPopup">
+  <div id="statsContent"></div>
+  <button class="clear-btn" onclick="clearStats()">누적 기록 초기화</button>
+</div>
+
+<div class="saved">
+  <h3>저장된 타이머</h3>
+  <div id="savedList"></div>
+</div>
+
+<script>
+const CIRC = 2*Math.PI*100;
+
+let mode="focus", interval=null, total=0, elapsed=0;
+let color="#ff6b6b", startTime=null;
+
+let focusStats = JSON.parse(localStorage.getItem("focusStats")||"{}");
+
+function update(){
+  time.innerText =
+    String(Math.floor(elapsed/60)).padStart(2,'0')+":"+
+    String(elapsed%60).padStart(2,'0');
+
+  mode.innerText = mode==="focus"?"집중 중":"휴식 중";
+
+  document.querySelector(".progress").style.stroke =
+    mode==="focus"?color:"#51cf66";
+
+  document.querySelector(".progress").style.strokeDashoffset =
+    CIRC*(1-elapsed/total||1);
+}
+
+function start(){
+  if(interval) return;
+  total = total || (mode==="focus"?saveFocus.value*60:saveBreak.value*60);
+
+  interval = setInterval(()=>{
+    elapsed++; update();
+    if(elapsed>=total){
+      clearInterval(interval); interval=null;
+
+      if(mode==="focus"){
+        const t = saveTitle.value || "타이머";
+        if(!focusStats[t]) focusStats[t]={time:0,color};
+        focusStats[t].time += total/60;
+        focusStats[t].color = color;
+        localStorage.setItem("focusStats",JSON.stringify(focusStats));
+        renderStats();
+      }
+
+      mode = mode==="focus"?"break":"focus";
+      elapsed=total=0;
+      start();
+    }
+  },1000);
+}
+
+function pause(){ clearInterval(interval); interval=null; }
+function reset(){ pause(); mode="focus"; elapsed=total=0; update(); }
+
+function toggleSave(){
+  savePopup.style.display = savePopup.style.display==="block"?"none":"block";
+}
+function toggleStats(){
+  statsPopup.style.display = statsPopup.style.display==="block"?"none":"block";
+}
+
+function savePreset(){
+  const presets = JSON.parse(localStorage.getItem("presets")||"[]");
+  presets.push({
+    title: saveTitle.value,
+    focus: saveFocus.value,
+    break: saveBreak.value,
+    color: saveColor.value
+  });
+  localStorage.setItem("presets",JSON.stringify(presets));
+  renderPresets();
+}
+
+function renderPresets(){
+  savedList.innerHTML="";
+  JSON.parse(localStorage.getItem("presets")||"[]").forEach((p,i)=>{
+    const wrap=document.createElement("div");
+    wrap.className="saved-item";
+
+    const btn=document.createElement("button");
+    btn.style.background=p.color;
+    btn.style.color="white";
+    btn.innerText=p.title;
+    btn.onclick=()=>{
+      title.innerText=p.title;
+      saveTitle.value=p.title;
+      saveFocus.value=p.focus;
+      saveBreak.value=p.break;
+      saveColor.value=p.color;
+      color=p.color;
+      if(focusStats[p.title]) focusStats[p.title].color=p.color;
+      localStorage.setItem("focusStats",JSON.stringify(focusStats));
+      reset(); renderStats();
+    };
+
+    const del=document.createElement("button");
+    del.innerText="X";
+    del.onclick=()=>{
+      const arr=JSON.parse(localStorage.getItem("presets"));
+      arr.splice(i,1);
+      localStorage.setItem("presets",JSON.stringify(arr));
+      renderPresets();
+    };
+
+    wrap.append(btn,del);
+    savedList.append(wrap);
+  });
+}
+
+function renderStats(){
+  statsContent.innerHTML="";
+  if(Object.keys(focusStats).length===0){
+    statsContent.innerText="집중기록 없음";
+    return;
+  }
+  Object.entries(focusStats).forEach(([k,v])=>{
+    const row=document.createElement("div");
+    row.className="bar-row";
+
+    const label=document.createElement("div");
+    label.innerText=`${k} ${v.time}분`;
+
+    const bar=document.createElement("div");
+    bar.className="bar";
+    bar.style.width=(v.time*5)+"px";
+    bar.style.background=v.color;
+
+    row.append(label,bar);
+    statsContent.append(row);
+  });
+}
+
+function clearStats(){
+  focusStats={};
+  localStorage.removeItem("focusStats");
+  renderStats();
+}
+
+renderPresets();
+renderStats();
+update();
+</script>
+
+</body>
+</html>
