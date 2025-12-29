@@ -13,13 +13,13 @@ body {
   font-family: 'KyoboHandwriting2019', -apple-system;
   background:#f6f6f6;
   text-align:center;
-  padding:15px;
+  padding:20px;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-/* ===== 타이머 ===== */
+/* ===== 타이머 외형 ===== */
 .circle {
   width:140px;
   height:140px;
@@ -31,12 +31,12 @@ svg { transform: rotate(-90deg); }
 
 .bg { fill:none; stroke:#e9ecef; stroke-width:10; }
 .progress { 
-    fill:none; 
-    stroke-width:10; 
-    stroke-dasharray:408.4; /* 2 * PI * 65 */
-    stroke-dashoffset:408.4; 
-    transition:stroke-dashoffset 0.5s linear, stroke 0.3s; 
-    stroke-linecap: round;
+  fill:none; 
+  stroke-width:10; 
+  stroke-dasharray:408.4; /* 2 * PI * 65 */
+  stroke-dashoffset:408.4; /* 초기값: 완전히 비어있음 */
+  transition:stroke-dashoffset 0.5s linear, stroke 0.3s; 
+  stroke-linecap: round;
 }
 
 .center {
@@ -51,82 +51,89 @@ svg { transform: rotate(-90deg); }
 .time { font-size:24px; font-weight: bold; }
 .mode { font-size:12px; color: #888; }
 
-/* ===== 버튼 공통 ===== */
+/* ===== 버튼 레이아웃 ===== */
+.container { width: 220px; }
+
 button {
   font-family: 'KyoboHandwriting2019';
   border:none;
-  border-radius:6px;
-  padding:5px 10px;
-  margin:2px;
-  font-size:13px;
+  border-radius:8px;
+  padding:6px 10px;
+  margin:3px;
+  font-size:14px;
   cursor:pointer;
-  transition: opacity 0.2s;
 }
-
-button:hover { opacity: 0.8; }
 
 .start { background:#ff6b6b; color:white; }
 .pause { background:#4dabf7; color:white; }
 .reset { background:#868e96; color:white; }
 
-/* ===== 설정 및 통계 섹션 ===== */
-.container { width: 180px; }
-
+.sub-btns { display: flex; justify-content: center; gap: 5px; margin-top: 5px; }
 .store-btn, .stats-btn {
-  width: 100%;
-  margin-top:6px;
   background:#dee2e6;
   color: #495057;
+  font-size: 12px;
+  flex: 1;
 }
 
+/* ===== 설정 및 기록 팝업 ===== */
 .popup, .stats-popup {
   display:none;
-  margin-top:6px;
-  padding:10px;
+  margin-top:10px;
+  padding:12px;
   background:white;
-  border-radius:8px;
-  font-size:12px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  border-radius:10px;
+  font-size:13px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
   text-align: left;
 }
 
 .popup input {
   font-family: 'KyoboHandwriting2019';
-  font-size:12px;
-  margin:4px 0;
-  padding:2px 4px;
-  width:80%;
+  width: 85%;
+  margin: 5px 0;
+  padding: 4px;
   border: 1px solid #ddd;
   border-radius: 4px;
 }
 
-/* ===== 저장된 타이머 목록 ===== */
+/* ===== 저장된 타이머 리스트 (정렬 수정) ===== */
 .saved { 
-    margin-top:15px; 
-    width: 180px;
-    text-align:center; 
+  margin-top: 20px; 
+  width: 100%;
+  text-align: left;
 }
-.saved b { display: block; margin-bottom: 8px; font-size: 14px; }
+.saved b { display: block; margin-bottom: 8px; font-size: 14px; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
 .saved-item { 
-    display:flex; 
-    justify-content:space-between; 
-    margin-bottom:5px; 
+  display: flex; 
+  align-items: center; 
+  margin-bottom: 6px; 
 }
-.saved-item button:first-child { flex:1; color:white; text-align: center; }
-.saved-item button:last-child { background:#ff8787; color:white; margin-left:4px; width: 30px; }
+.saved-item button:first-child { 
+  flex: 1; 
+  color: white; 
+  text-align: center; 
+  font-size: 13px;
+  padding: 8px;
+}
+.saved-item button:last-child { 
+  background: #adb5bd; 
+  color: white; 
+  width: 30px; 
+  margin-left: 5px; 
+}
 
-/* ===== 누적 기록 바 ===== */
+/* ===== 기록 바 ===== */
 .stat-row { display:flex; align-items:center; margin-bottom:6px; }
-.stat-name { width:50px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.stat-bar { flex:1; height:10px; background:#e9ecef; border-radius:5px; overflow:hidden; margin:0 6px; }
-.stat-fill { height:100%; }
+.stat-name { width:50px; white-space: nowrap; overflow: hidden; }
+.stat-bar { flex:1; height:10px; background:#e9ecef; border-radius:5px; margin:0 8px; position:relative; }
+.stat-fill { height:100%; border-radius:5px; }
 .stat-time { width:35px; font-size:11px; text-align:right; }
-.clear-btn { width:100%; margin-top:8px; background:#adb5bd; color:white; }
 </style>
 </head>
 <body>
 
-<h3 style="margin:5px 0;">🍅 Pomodoro</h3>
+<h3 style="margin:10px 0;">🍅 Pomodoro</h3>
 
 <div class="circle">
 <svg width="140" height="140">
@@ -134,8 +141,8 @@ button:hover { opacity: 0.8; }
   <circle class="progress" id="prg" cx="70" cy="70" r="65"></circle>
 </svg>
 <div class="center">
-  <div class="title" id="title">집중하기</div>
-  <div class="time" id="time">25:00</div>
+  <div class="title" id="title">타이머</div>
+  <div class="time" id="time">00:00</div>
   <div class="mode" id="mode">대기 중</div>
 </div>
 </div>
@@ -147,51 +154,58 @@ button:hover { opacity: 0.8; }
       <button class="reset" onclick="reset()">Reset</button>
     </div>
 
-    <button class="store-btn" onclick="togglePopup()">타이머 추가 ▼</button>
-    <div class="popup" id="popup">
-      이름: <input id="saveTitle" placeholder="예: 코딩, 독서"><br>
-      집중: <input id="saveFocus" type="number" value="25">분<br>
-      색상: <input id="saveColor" type="color" value="#ff6b6b" style="width:40px; height:20px; padding:0; vertical-align:middle;"><br>
-      <button onclick="savePreset()" style="width:100%; margin-top:5px; background:#5c7cfa; color:white;">목록에 추가</button>
+    <div class="sub-btns">
+      <button class="store-btn" onclick="togglePopup()">타이머 저장 ▼</button>
+      <button class="stats-btn" onclick="toggleStats()">누적 기록 ▼</button>
     </div>
 
-    <button class="stats-btn" onclick="toggleStats()">누적 기록 ▼</button>
+    <div class="popup" id="popup">
+      <input id="saveTitle" placeholder="타이머 제목"><br>
+      집중 <input id="saveFocus" type="number" value="25">분<br>
+      색상 <input id="saveColor" type="color" value="#ff6b6b" style="height:30px; padding:0; border:none;"><br>
+      <button onclick="savePreset()" style="width:100%; background:#4dabf7; color:white; margin-top:5px;">저장하기</button>
+    </div>
+
     <div class="stats-popup" id="statsPopup">
       <div id="stats"></div>
-      <button class="clear-btn" onclick="clearStats()">기록 초기화</button>
+      <button onclick="clearStats()" style="width:100%; background:#868e96; color:white; font-size:11px; margin-top:10px;">기록 초기화</button>
     </div>
 
-    <div class="saved" id="savedTimers">
-      <b>나의 타이머</b>
+    <div class="saved">
+      <b>저장된 타이머</b>
       <div id="savedList"></div>
     </div>
 </div>
 
 <script>
-const CIRC = 2 * Math.PI * 65; // 약 408.4
-let mode="focus", interval=null, total=1500, elapsed=0, color="#ff6b6b";
+const CIRC = 2 * Math.PI * 65; 
+let mode="focus", interval=null, total=0, elapsed=0, color="#ff6b6b";
 let focusStats = JSON.parse(localStorage.getItem("focusStats")||"{}");
 
-// ===== UI 업데이트 =====
+// ===== UI 업데이트 (진행바 초기화 수정 핵심) =====
 function update(){
   const remain = total - elapsed;
   const m = Math.floor(Math.max(0, remain) / 60).toString().padStart(2,'0');
   const s = (Math.max(0, remain) % 60).toString().padStart(2,'0');
   
   document.getElementById("time").innerText = m + ":" + s;
-  document.getElementById("mode").innerText = interval ? (mode==="focus"?"집중 중":"휴식 중") : "대기 중";
   
-  const prgIdx = document.getElementById("prg");
-  prgIdx.style.stroke = color;
+  const prg = document.getElementById("prg");
+  prg.style.stroke = color;
   
-  // 진행 바 계산: 시작 시 strokeDashoffset이 0이 되어야 꽉 참
-  const offset = total > 0 ? (elapsed / total) * CIRC : 0;
-  prgIdx.style.strokeDashoffset = offset;
+  // 핵심 수정: total이 0이거나 elapsed가 0이면 offset을 최대치(비어있음)로 설정
+  if (total === 0 || elapsed === 0) {
+    prg.style.strokeDashoffset = CIRC;
+  } else {
+    const offset = CIRC * (1 - elapsed / total);
+    prg.style.strokeDashoffset = offset;
+  }
 }
 
 // ===== 타이머 기능 =====
 function start(){
-  if(interval) return;
+  if(interval || total === 0) return;
+  document.getElementById("mode").innerText = "집중 중";
   interval = setInterval(() => {
     elapsed++;
     update();
@@ -201,31 +215,24 @@ function start(){
       focusStats[t] = (focusStats[t]||0) + Math.floor(total/60);
       localStorage.setItem("focusStats", JSON.stringify(focusStats));
       renderStats();
-      alert("시간이 다 되었습니다!");
+      alert("집중 완료!");
       reset();
     }
   }, 1000);
 }
 
-function pause(){ clearInterval(interval); interval=null; update(); }
-function reset(){ pause(); elapsed=0; update(); }
+function pause(){ clearInterval(interval); interval=null; document.getElementById("mode").innerText = "일시정지"; }
+function reset(){ pause(); elapsed=0; document.getElementById("mode").innerText = "대기 중"; update(); }
 
-// ===== 팝업 토글 =====
-function togglePopup(){ 
-    const p = document.getElementById("popup");
-    p.style.display = p.style.display==="block"?"none":"block"; 
-}
-function toggleStats(){ 
-    const s = document.getElementById("statsPopup");
-    s.style.display = s.style.display==="block"?"none":"block"; 
-}
+function togglePopup(){ popup.style.display = popup.style.display==="block"?"none":"block"; }
+function toggleStats(){ statsPopup.style.display = statsPopup.style.display==="block"?"none":"block"; }
 
-// ===== 프리셋 저장 및 렌더링 =====
+// ===== 저장/렌더링 =====
 function savePreset(){
   const presets = JSON.parse(localStorage.getItem("presets")||"[]");
   presets.push({
     title: document.getElementById("saveTitle").value || "타이머",
-    focus: parseInt(document.getElementById("saveFocus").value) || 25,
+    focus: document.getElementById("saveFocus").value,
     color: document.getElementById("saveColor").value
   });
   localStorage.setItem("presets", JSON.stringify(presets));
@@ -237,11 +244,9 @@ function renderPresets(){
   const savedList = document.getElementById("savedList");
   savedList.innerHTML="";
   const presets = JSON.parse(localStorage.getItem("presets")||"[]");
-  
   presets.forEach((p, i) => {
     const div = document.createElement("div");
     div.className = "saved-item";
-    
     const b = document.createElement("button");
     b.style.background = p.color;
     b.innerText = `${p.title} (${p.focus}분)`;
@@ -251,7 +256,6 @@ function renderPresets(){
       total = p.focus * 60;
       reset();
     };
-    
     const d = document.createElement("button");
     d.innerText = "X";
     d.onclick = () => {
@@ -259,50 +263,29 @@ function renderPresets(){
       localStorage.setItem("presets", JSON.stringify(presets));
       renderPresets();
     };
-    
-    div.appendChild(b);
-    div.appendChild(d);
-    savedList.appendChild(div);
+    div.append(b, d);
+    savedList.append(div);
   });
 }
 
-// ===== 누적 집중 기록 렌더링 =====
 function renderStats(){
-  const statsDiv = document.getElementById("stats");
-  statsDiv.innerHTML="";
+  stats.innerHTML="";
   const entries = Object.entries(focusStats);
-  
-  if(entries.length === 0){
-    statsDiv.innerHTML = '<div style="text-align:center; color:#868e96;">기록이 없습니다.</div>';
-    return;
-  }
-  
+  if(!entries.length) { stats.innerHTML = "<center>기록 없음</center>"; return; }
   const max = Math.max(...entries.map(e => e[1]));
   entries.forEach(([name, min]) => {
-    const presets = JSON.parse(localStorage.getItem("presets")||"[]");
-    const colorVal = presets.find(p => p.title === name)?.color || "#adb5bd";
-    
-    const row = document.createElement("div");
-    row.className = "stat-row";
-    row.innerHTML = `
-      <div class="stat-name">${name}</div>
-      <div class="stat-bar">
-        <div class="stat-fill" style="width:${(min/max)*100}%; background:${colorVal}"></div>
-      </div>
-      <div class="stat-time">${min}분</div>`;
-    statsDiv.appendChild(row);
+    const pColor = JSON.parse(localStorage.getItem("presets")||"[]").find(p=>p.title===name)?.color || "#adb5bd";
+    stats.innerHTML += `
+      <div class="stat-row">
+        <div class="stat-name">${name}</div>
+        <div class="stat-bar"><div class="stat-fill" style="width:${(min/max)*100}%; background:${pColor}"></div></div>
+        <div class="stat-time">${min}분</div>
+      </div>`;
   });
 }
 
-function clearStats(){
-  if(confirm("모든 기록을 삭제하시겠습니까?")) {
-    focusStats = {};
-    localStorage.removeItem("focusStats");
-    renderStats();
-  }
-}
+function clearStats(){ if(confirm("기록을 지울까요?")) { focusStats={}; localStorage.removeItem("focusStats"); renderStats(); } }
 
-// 초기화
 renderPresets();
 renderStats();
 update();
