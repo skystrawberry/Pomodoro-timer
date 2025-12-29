@@ -9,11 +9,8 @@
   src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/KyoboHandwriting2019.woff') format('woff');
 }
 
-/* 모든 요소에 폰트 및 박스 모델 적용 */
-* {
-  font-family: 'KyoboHandwriting2019', sans-serif !important;
-  box-sizing: border-box;
-}
+/* 모든 요소에 폰트 적용 */
+* { font-family: 'KyoboHandwriting2019', -apple-system !important; }
 
 body {
   background:#f6f6f6;
@@ -80,7 +77,7 @@ button {
   flex: 1;
 }
 
-/* ===== 설정 및 기록 팝업 ===== */
+/* ===== 설정 팝업 (휴식 입력 추가) ===== */
 .popup, .stats-popup {
   display:none;
   margin-top:10px;
@@ -92,39 +89,46 @@ button {
   text-align: left;
 }
 
-.popup b { display: block; margin-bottom: 5px; }
-.input-group { margin-bottom: 8px; }
-.input-group label { display: inline-block; width: 40px; }
-.input-group input {
-  width: 100px;
+.popup input {
+  width: 70px;
+  margin: 5px 0;
   padding: 4px;
   border: 1px solid #ddd;
   border-radius: 4px;
 }
 
-input[type="color"] {
-  width: 100% !important;
-  height: 30px;
-  cursor: pointer;
-  border: none;
-  background: none;
-}
+#saveTitle { width: 85%; }
 
 /* ===== 저장된 타이머 리스트 ===== */
-.saved { margin-top: 20px; width: 100%; }
-.saved b { display: block; margin-bottom: 8px; font-size: 14px; border-bottom: 1px solid #ddd; padding-bottom: 4px; text-align: left; }
-.saved-item { display: flex; align-items: center; margin-bottom: 6px; }
+.saved { 
+  margin-top: 20px; 
+  width: 100%;
+  text-align: left;
+}
+.saved b { display: block; margin-bottom: 8px; font-size: 14px; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
+.saved-item { 
+  display: flex; 
+  align-items: center; 
+  margin-bottom: 6px; 
+}
 .saved-item button:first-child { 
-  flex: 1; color: white; text-align: center; font-size: 13px; padding: 8px; 
+  flex: 1; 
+  color: white; 
+  text-align: center; 
+  font-size: 13px;
+  padding: 8px;
 }
 .saved-item button:last-child { 
-  background: #adb5bd; color: white; width: 30px; margin-left: 5px; 
+  background: #adb5bd; 
+  color: white; 
+  width: 30px; 
+  margin-left: 5px; 
 }
 
 /* ===== 기록 바 ===== */
 .stat-row { display:flex; align-items:center; margin-bottom:6px; }
 .stat-name { width:50px; white-space: nowrap; overflow: hidden; }
-.stat-bar { flex:1; height:10px; background:#e9ecef; border-radius:5px; margin:0 8px; }
+.stat-bar { flex:1; height:10px; background:#e9ecef; border-radius:5px; margin:0 8px; position:relative; }
 .stat-fill { height:100%; border-radius:5px; }
 .stat-time { width:35px; font-size:11px; text-align:right; }
 </style>
@@ -158,12 +162,11 @@ input[type="color"] {
     </div>
 
     <div class="popup" id="popup">
-      <b>새 타이머 설정</b>
-      <div class="input-group"><label>이름</label><input id="saveTitle" placeholder="예: 코딩"></div>
-      <div class="input-group"><label>집중</label><input id="saveFocus" type="number" value="25"> 분</div>
-      <div class="input-group"><label>휴식</label><input id="saveBreak" type="number" value="5"> 분</div>
-      <div class="input-group"><label>색상</label><input id="saveColor" type="color" value="#ff6b6b"></div>
-      <button onclick="savePreset()" style="width:100%; background:#4dabf7; color:white;">저장하기</button>
+      <input id="saveTitle" placeholder="타이머 제목"><br>
+      집중 <input id="saveFocus" type="number" value="25">분 / 
+      휴식 <input id="saveBreak" type="number" value="5">분<br>
+      색상 <input id="saveColor" type="color" value="#ff6b6b" style="height:30px; padding:0; border:none; width:100%;"><br>
+      <button onclick="savePreset()" style="width:100%; background:#4dabf7; color:white; margin-top:5px;">저장하기</button>
     </div>
 
     <div class="stats-popup" id="statsPopup">
@@ -180,14 +183,14 @@ input[type="color"] {
 <script>
 const CIRC = 2 * Math.PI * 65; 
 let mode="focus", interval=null, total=0, elapsed=0, color="#ff6b6b";
-let currentFocusMin = 0;
-let currentBreakMin = 0;
+let currentFocus = 0, currentBreak = 0; // 현재 선택된 설정값 저장
 let focusStats = JSON.parse(localStorage.getItem("focusStats")||"{}");
 
 function update(){
   const remain = total - elapsed;
   const m = Math.floor(Math.max(0, remain) / 60).toString().padStart(2,'0');
   const s = (Math.max(0, remain) % 60).toString().padStart(2,'0');
+  
   document.getElementById("time").innerText = m + ":" + s;
   
   const prg = document.getElementById("prg");
@@ -196,11 +199,12 @@ function update(){
   if (total === 0 || elapsed === 0) {
     prg.style.strokeDashoffset = CIRC;
   } else {
-    prg.style.strokeDashoffset = CIRC * (1 - elapsed / total);
+    const offset = CIRC * (1 - elapsed / total);
+    prg.style.strokeDashoffset = offset;
   }
 }
 
-// 타이머 시작 및 자동 전환 로직
+// ===== 자동 전환 로직이 포함된 타이머 기능 =====
 function start(){
   if(interval || total === 0) return;
   document.getElementById("mode").innerText = mode === "focus" ? "집중 중" : "휴식 중";
@@ -208,43 +212,37 @@ function start(){
   interval = setInterval(() => {
     elapsed++;
     update();
-    
     if(elapsed >= total){
-      clearInterval(interval);
-      interval = null;
-      
-      if(mode === "focus") {
-        // 집중 끝 -> 기록 저장 및 휴식 전환
+      pause();
+      if(mode === "focus"){
+        // 집중 완료 시
         const t = document.getElementById("title").innerText;
         focusStats[t] = (focusStats[t]||0) + Math.floor(total/60);
         localStorage.setItem("focusStats", JSON.stringify(focusStats));
         renderStats();
+        alert("집중 완료! 휴식을 시작합니다.");
         
-        alert("집중 완료! 휴식 시간으로 자동 전환됩니다.");
+        // 휴식 모드로 전환 및 자동 시작
         mode = "break";
-        total = currentBreakMin * 60;
+        total = currentBreak * 60;
         elapsed = 0;
         update();
-        start(); // 휴식 타이머 자동 시작
+        start(); 
       } else {
-        // 휴식 끝 -> 집중 전환
-        alert("휴식 완료! 다시 집중 시간을 시작합니다.");
+        // 휴식 완료 시
+        alert("휴식 완료! 다시 집중을 시작합니다.");
         mode = "focus";
-        total = currentFocusMin * 60;
+        total = currentFocus * 60;
         elapsed = 0;
         update();
-        start(); // 집중 타이머 자동 시작
+        start();
       }
     }
   }, 1000);
 }
 
 function pause(){ clearInterval(interval); interval=null; document.getElementById("mode").innerText = "일시정지"; }
-function reset(){ 
-  pause(); elapsed=0; mode="focus"; 
-  document.getElementById("mode").innerText = "대기 중"; 
-  update(); 
-}
+function reset(){ pause(); elapsed=0; mode="focus"; document.getElementById("mode").innerText = "대기 중"; update(); }
 
 function togglePopup(){ popup.style.display = popup.style.display==="block"?"none":"block"; }
 function toggleStats(){ statsPopup.style.display = statsPopup.style.display==="block"?"none":"block"; }
@@ -271,13 +269,14 @@ function renderPresets(){
     div.className = "saved-item";
     const b = document.createElement("button");
     b.style.background = p.color;
-    b.innerText = `${p.title} (집중:${p.focus}/휴식:${p.break})`;
+    // 리스트에 집중/휴식 시간 모두 표시
+    b.innerText = `${p.title} (집중:${p.focus}분 / 휴식:${p.break}분)`;
     b.onclick = () => {
       document.getElementById("title").innerText = p.title;
       color = p.color;
-      currentFocusMin = p.focus;
-      currentBreakMin = p.break;
-      total = currentFocusMin * 60;
+      currentFocus = p.focus;
+      currentBreak = p.break;
+      total = currentFocus * 60;
       reset();
     };
     const d = document.createElement("button");
