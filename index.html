@@ -13,7 +13,7 @@ body {
   font-family: 'KyoboHandwriting2019', -apple-system;
   background:#f6f6f6;
   text-align:center;
-  padding:6px;  /* 상단 여백 최소화 */
+  padding:6px;
 }
 
 /* ===== 타이머 ===== */
@@ -66,6 +66,14 @@ button {
   font-size:12px;
 }
 
+.popup input {
+  font-family: 'KyoboHandwriting2019';
+  font-size:12px;
+  margin:2px 0;
+  padding:2px 4px;
+  width:90%;
+}
+
 /* ===== 저장된 타이머 ===== */
 .saved { margin-top:8px; text-align:left; font-size:12px; }
 .saved div { display:flex; justify-content:space-between; margin-bottom:4px; }
@@ -100,20 +108,23 @@ button {
 </div>
 </div>
 
+<!-- Start / Pause / Reset 버튼 -->
 <div>
   <button class="start" onclick="start()">Start</button>
   <button class="pause" onclick="pause()">Pause</button>
   <button class="reset" onclick="reset()">Reset</button>
 </div>
 
-<button class="toggle" onclick="togglePopup()">타이머 저장 ▼</button>
+<!-- 타이머 저장 / 누적 기록 버튼 -->
+<button class="toggle" onclick="togglePopup()">타이머 저장 / 누적 기록 ▼</button>
 
 <div class="popup" id="popup">
   <input id="saveTitle" placeholder="타이머 제목"><br>
-  집중 <input id="saveFocus" type="number" min="1" max="60" value="25" style="width:50px">분<br>
-  휴식 <input id="saveBreak" type="number" min="1" max="60" value="5" style="width:50px">분<br>
+  집중 <input id="saveFocus" type="number" min="1" max="60" value="25">분<br>
+  휴식 <input id="saveBreak" type="number" min="1" max="60" value="5">분<br>
   색상 <input id="saveColor" value="#ff6b6b"><br>
   <button onclick="savePreset()">타이머 저장</button>
+  <button class="clear-btn" onclick="clearStats()">누적 기록 초기화</button>
 </div>
 
 <div class="saved">
@@ -122,7 +133,6 @@ button {
 </div>
 
 <div class="stats" id="stats"></div>
-<button class="clear-btn" onclick="clearStats()">누적 기록 초기화</button>
 
 <script>
 const CIRC = 2*Math.PI*65;
