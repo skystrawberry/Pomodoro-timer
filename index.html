@@ -14,14 +14,14 @@
 body {
   background:#f6f6f6;
   text-align:center;
-  padding: 0 20px 20px 20px; /* 상단 패딩 0 */
+  padding: 0 20px 20px 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
   overflow-x: hidden;
 }
 
-h3 { margin: 0; padding-top: 5px; font-size: 18px; } /* 제목 여백 최소화 */
+h3 { margin: 0; padding-top: 5px; font-size: 18px; }
 
 .circle {
   width:140px;
@@ -38,7 +38,6 @@ svg { transform: rotate(-90deg); }
   stroke-width:10; 
   stroke-dasharray:408.4; 
   stroke-dashoffset:408.4; 
-  /* 애니메이션을 아주 짧게 설정하여 부드럽게 연결 */
   transition: stroke-dashoffset 0.1s linear, stroke 0.3s; 
   stroke-linecap: round;
 }
@@ -127,7 +126,7 @@ button {
 .stat-row { display:flex; align-items:center; margin-bottom:6px; }
 .stat-name { width:50px; white-space: nowrap; overflow: hidden; font-size: 11px; }
 .stat-bar { flex:1; height:8px; background:#e9ecef; border-radius:5px; margin:0 8px; position:relative; }
-.stat-fill { height:100%; border-radius:5px; }
+.stat-fill { height:100%; border-radius:5px; transition: width 0.3s ease; }
 .stat-time { width:30px; font-size:10px; text-align:right; }
 </style>
 </head>
@@ -196,7 +195,6 @@ function update(){
   if (total === 0) {
     prg.style.strokeDashoffset = CIRC;
   } else {
-    // 경과 시간에 비례해 테두리가 채워짐
     const offset = CIRC * (1 - elapsed / total);
     prg.style.strokeDashoffset = offset;
   }
@@ -280,6 +278,7 @@ function renderPresets(){
       presets.splice(i, 1);
       localStorage.setItem("presets", JSON.stringify(presets));
       renderPresets();
+      renderStats(); // 기록 색상 갱신을 위해 호출
     };
     div.append(b, d);
     savedList.append(div);
@@ -291,18 +290,24 @@ function renderStats(){
   statsDiv.innerHTML="";
   const entries = Object.entries(focusStats);
   if(!entries.length) { statsDiv.innerHTML = "<center style='font-size:11px;'>기록 없음</center>"; return; }
+  
+  const presets = JSON.parse(localStorage.getItem("presets")||"[]");
   const max = Math.max(...entries.map(e => e[1]));
+  
   entries.forEach(([name, min]) => {
+    // 저장된 프리셋에서 해당 타이머의 색상을 찾음 (없으면 기본 회색)
+    const match = presets.find(p => p.title === name);
+    const barColor = match ? match.color : "#adb5bd";
+    
     statsDiv.innerHTML += `
       <div class="stat-row">
         <div class="stat-name">${name}</div>
-        <div class="stat-bar"><div class="stat-fill" style="width:${(min/max)*100}%; background:#ff6b6b"></div></div>
+        <div class="stat-bar"><div class="stat-fill" style="width:${(min/max)*100}%; background:${barColor}"></div></div>
         <div class="stat-time">${min}분</div>
       </div>`;
   });
 }
 
-// 알림창 없이 즉시 삭제
 function clearStats(){ 
   focusStats={}; 
   localStorage.removeItem("focusStats"); 
