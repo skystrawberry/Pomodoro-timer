@@ -9,61 +9,45 @@
   src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/KyoboHandwriting2019.woff') format('woff');
 }
 
-/* 모든 요소에 폰트 강제 적용 */
-* {
-  font-family: 'KyoboHandwriting2019', sans-serif !important;
-}
-
 body {
+  font-family: 'KyoboHandwriting2019', -apple-system;
   background:#f6f6f6;
   text-align:center;
-  padding:20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  padding:6px;
 }
 
-/* ===== 타이머 외형 ===== */
+/* ===== 타이머 ===== */
 .circle {
   width:140px;
   height:140px;
-  margin:10px auto;
+  margin:6px auto;
   position:relative;
 }
 
 svg { transform: rotate(-90deg); }
 
 .bg { fill:none; stroke:#e9ecef; stroke-width:10; }
-.progress { 
-  fill:none; 
-  stroke-width:10; 
-  stroke-dasharray:408.4; 
-  stroke-dashoffset:408.4; 
-  transition:stroke-dashoffset 0.5s linear, stroke 0.3s; 
-  stroke-linecap: round;
-}
+.progress { fill:none; stroke-width:10; stroke-dasharray:440; stroke-dashoffset:440; transition:stroke-dashoffset 0.5s linear, stroke 0.3s; }
 
 .center {
   position:absolute;
   top:50%;
   left:50%;
   transform:translate(-50%,-50%);
-  width: 100%;
 }
 
-.title { font-size:13px; margin-bottom:2px; color: #555; }
-.time { font-size:24px; font-weight: bold; }
-.mode { font-size:12px; color: #888; }
+.title { font-size:13px; margin-bottom:2px; }
+.time { font-size:24px; }
+.mode { font-size:12px; }
 
-/* ===== 버튼 레이아웃 ===== */
-.container { width: 220px; }
-
+/* ===== 버튼 ===== */
 button {
+  font-family: 'KyoboHandwriting2019';
   border:none;
-  border-radius:8 :px;
-  padding:6px 10px;
-  margin:3px;
-  font-size:14px;
+  border-radius:6px;
+  padding:3px 5px;
+  margin:2px;
+  font-size:12px;
   cursor:pointer;
 }
 
@@ -71,85 +55,56 @@ button {
 .pause { background:#4dabf7; color:white; }
 .reset { background:#868e96; color:white; }
 
-.sub-btns { display: flex; justify-content: center; gap: 5px; margin-top: 5px; }
+/* ===== 타이머 저장 / 누적기록 버튼 ===== */
 .store-btn, .stats-btn {
+  margin-top:4px;
   background:#dee2e6;
-  color: #495057;
-  font-size: 12px;
-  flex: 1;
 }
 
-/* ===== 설정 및 기록 팝업 ===== */
-.popup, .stats-popup {
+/* ===== 저장 팝업 ===== */
+.popup {
   display:none;
-  margin-top:10px;
-  padding:12px;
+  margin-top:4px;
+  padding:6px;
   background:white;
-  border-radius:10px;
-  font-size:13px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-  text-align: left;
+  border-radius:8px;
+  font-size:12px;
 }
 
 .popup input {
-  width: 80%;
-  margin: 5px 0;
-  padding: 4px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 13px;
+  font-family: 'KyoboHandwriting2019';
+  font-size:12px;
+  margin:2px 0;
+  padding:2px 4px;
+  width:90%;
 }
 
-/* 컬러 피커 스타일 */
-input[type="color"] {
-  width: 100% !important;
-  height: 30px;
-  cursor: pointer;
-  border: none;
-  background: none;
-}
+/* ===== 저장된 타이머 ===== */
+.saved { margin-top:6px; text-align:left; font-size:12px; }
+.saved div { display:flex; justify-content:space-between; margin-bottom:4px; }
+.saved div button:first-child { flex:1; color:white; }
+.saved div button:last-child { background:#adb5bd; color:white; margin-left:4px; }
 
-/* ===== 저장된 타이머 리스트 ===== */
-.saved { 
-  margin-top: 20px; 
-  width: 100%;
-}
-.saved b { display: block; margin-bottom: 8px; font-size: 14px; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
-.saved-item { 
-  display: flex; 
-  align-items: center; 
-  margin-bottom: 6px; 
-}
-.saved-item button:first-child { 
-  flex: 1; 
-  color: white; 
-  text-align: center; 
-  font-size: 13px;
-  padding: 8px;
-}
-.saved-item button:last-child { 
-  background: #adb5bd; 
-  color: white; 
-  width: 30px; 
-  margin-left: 5px; 
-}
+/* ===== 누적 집중 기록 ===== */
+.stats-popup { display:none; margin-top:4px; padding:6px; background:white; border-radius:8px; font-size:12px; }
+.stat-row { display:flex; align-items:center; margin-bottom:4px; }
+.stat-name { width:50px; }
+.stat-bar { flex:1; height:8px; background:#e9ecef; border-radius:6px; overflow:hidden; margin:0 4px; }
+.stat-fill { height:100%; }
+.stat-time { width:30px; font-size:11px; text-align:right; }
+.no-stats { text-align:center; color:#868e96; }
 
-/* ===== 기록 바 ===== */
-.stat-row { display:flex; align-items:center; margin-bottom:6px; }
-.stat-name { width:50px; white-space: nowrap; overflow: hidden; }
-.stat-bar { flex:1; height:10px; background:#e9ecef; border-radius:5px; margin:0 8px; position:relative; }
-.stat-fill { height:100%; border-radius:5px; }
-.stat-time { width:35px; font-size:11px; text-align:right; }
+.clear-btn { width:100%; margin-top:4px; background:#ff8787; color:white; font-size:11px; padding:3px 0; border-radius:6px; }
 </style>
 </head>
 <body>
 
-<h3 style="margin:10px 0;">🍅 Pomodoro</h3>
+<h3 style="margin:2px 0;">🍅 Pomodoro</h3>
 
 <div class="circle">
 <svg width="140" height="140">
   <circle class="bg" cx="70" cy="70" r="65"></circle>
-  <circle class="progress" id="prg" cx="70" cy="70" r="65"></circle>
+  <circle class="progress" cx="70" cy="70" r="65"></circle>
 </svg>
 <div class="center">
   <div class="title" id="title">타이머</div>
@@ -158,161 +113,151 @@ input[type="color"] {
 </div>
 </div>
 
-<div class="container">
-    <div>
-      <button class="start" onclick="start()">Start</button>
-      <button class="pause" onclick="pause()">Pause</button>
-      <button class="reset" onclick="reset()">Reset</button>
-    </div>
+<!-- Start / Pause / Reset 버튼 -->
+<div>
+  <button class="start" onclick="start()">Start</button>
+  <button class="pause" onclick="pause()">Pause</button>
+  <button class="reset" onclick="reset()">Reset</button>
+</div>
 
-    <div class="sub-btns">
-      <button class="store-btn" onclick="togglePopup()">타이머 저장 ▼</button>
-      <button class="stats-btn" onclick="toggleStats()">누적 기록 ▼</button>
-    </div>
+<!-- 타이머 저장 버튼 -->
+<button class="store-btn" onclick="togglePopup()">타이머 저장 ▼</button>
 
-    <div class="popup" id="popup">
-      이름: <input id="saveTitle" placeholder="예: 코딩, 독서"><br>
-      집중: <input id="saveFocus" type="number" value="25">분<br>
-      휴식: <input id="saveBreak" type="number" value="5">분<br>
-      색상: <input id="saveColor" type="color" value="#ff6b6b"><br>
-      <button onclick="savePreset()" style="width:100%; background:#4dabf7; color:white; margin-top:5px;">저장하기</button>
-    </div>
+<div class="popup" id="popup">
+  <input id="saveTitle" placeholder="타이머 제목"><br>
+  집중 <input id="saveFocus" type="number" min="1" max="60" value="25">분<br>
+  휴식 <input id="saveBreak" type="number" min="1" max="60" value="5">분<br>
+  색상 <input id="saveColor" value="#ff6b6b"><br>
+  <button onclick="savePreset()">타이머 저장</button>
+</div>
 
-    <div class="stats-popup" id="statsPopup">
-      <div id="stats"></div>
-      <button onclick="clearStats()" style="width:100%; background:#868e96; color:white; font-size:11px; margin-top:10px;">기록 초기화</button>
-    </div>
+<!-- 누적 기록 버튼 -->
+<button class="stats-btn" onclick="toggleStats()">누적 기록 ▼</button>
+<div class="stats-popup" id="statsPopup">
+  <div id="stats"></div>
+  <button class="clear-btn" onclick="clearStats()">누적 기록 초기화</button>
+</div>
 
-    <div class="saved">
-      <b>저장된 타이머</b>
-      <div id="savedList"></div>
-    </div>
+<!-- 저장된 타이머 -->
+<div class="saved" id="savedTimers">
+  <b>저장된 타이머</b>
+  <div id="savedList"></div>
 </div>
 
 <script>
-const CIRC = 2 * Math.PI * 65; 
-let mode="focus", interval=null, total=0, elapsed=0, color="#ff6b6b";
-let currentBreakTime = 0; // 현재 선택된 타이머의 휴식 시간 저장
+const CIRC = 2*Math.PI*65;
+let mode="focus", interval=null, total=1500, elapsed=0, color="#ff6b6b";
 let focusStats = JSON.parse(localStorage.getItem("focusStats")||"{}");
 
+// ===== UI 업데이트 =====
 function update(){
-  const remain = total - elapsed;
-  const m = Math.floor(Math.max(0, remain) / 60).toString().padStart(2,'0');
-  const s = (Math.max(0, remain) % 60).toString().padStart(2,'0');
-  document.getElementById("time").innerText = m + ":" + s;
-  
-  const prg = document.getElementById("prg");
-  prg.style.stroke = color;
-  
-  // 시작 전(elapsed=0)에는 게이지가 안 보이게 설정
-  if (total === 0 || elapsed === 0) {
-    prg.style.strokeDashoffset = CIRC;
-  } else {
-    const offset = CIRC * (1 - elapsed / total);
-    prg.style.strokeDashoffset = offset;
-  }
+  const m=Math.floor(elapsed/60).toString().padStart(2,'0');
+  const s=(elapsed%60).toString().padStart(2,'0');
+  document.getElementById("time").innerText = m+":"+s;
+  document.getElementById("mode").innerText = mode==="focus"?"집중 중":"휴식 중";
+  document.querySelector(".progress").style.stroke=color;
+  const offset = total>0 ? CIRC*(1-elapsed/total) : CIRC;
+  document.querySelector(".progress").style.strokeDashoffset = offset;
 }
 
+// ===== 타이머 기능 =====
 function start(){
-  if(interval || total === 0) return;
-  document.getElementById("mode").innerText = mode === "focus" ? "집중 중" : "휴식 중";
-  interval = setInterval(() => {
+  if(interval) return;
+  interval=setInterval(()=>{
     elapsed++;
     update();
-    if(elapsed >= total){
+    if(elapsed>=total){
       pause();
-      if(mode === "focus") {
-        const t = document.getElementById("title").innerText;
-        focusStats[t] = (focusStats[t]||0) + Math.floor(total/60);
-        localStorage.setItem("focusStats", JSON.stringify(focusStats));
-        renderStats();
-        alert("집중 끝! 휴식을 시작하세요.");
-        // 휴식 모드로 전환
-        mode = "break";
-        total = currentBreakTime * 60;
-        elapsed = 0;
-        update();
-      } else {
-        alert("휴식 끝! 다시 집중해볼까요?");
-        // 다시 초기 타이머로 리셋 (사용자가 수동으로 다시 시작하도록)
-        reset(); 
-      }
+      const t = document.getElementById("title").innerText;
+      focusStats[t] = (focusStats[t]||0) + Math.round(total/60);
+      localStorage.setItem("focusStats",JSON.stringify(focusStats));
+      renderStats();
+      reset();
     }
-  }, 1000);
+  },1000);
 }
 
-function pause(){ clearInterval(interval); interval=null; document.getElementById("mode").innerText = "일시정지"; }
-function reset(){ 
-  pause(); 
-  elapsed=0; 
-  mode="focus"; 
-  document.getElementById("mode").innerText = "대기 중"; 
-  update(); 
-}
+function pause(){ clearInterval(interval); interval=null; }
+function reset(){ pause(); elapsed=0; update(); }
 
+// ===== 팝업 토글 =====
 function togglePopup(){ popup.style.display = popup.style.display==="block"?"none":"block"; }
 function toggleStats(){ statsPopup.style.display = statsPopup.style.display==="block"?"none":"block"; }
 
+// ===== 저장된 타이머 =====
 function savePreset(){
   const presets = JSON.parse(localStorage.getItem("presets")||"[]");
   presets.push({
-    title: document.getElementById("saveTitle").value || "타이머",
-    focus: document.getElementById("saveFocus").value,
-    break: document.getElementById("saveBreak").value,
-    color: document.getElementById("saveColor").value
+    title: saveTitle.value,
+    focus: saveFocus.value,
+    break: saveBreak.value,
+    color: saveColor.value
   });
-  localStorage.setItem("presets", JSON.stringify(presets));
+  localStorage.setItem("presets",JSON.stringify(presets));
   renderPresets();
-  togglePopup();
 }
 
 function renderPresets(){
   const savedList = document.getElementById("savedList");
   savedList.innerHTML="";
-  const presets = JSON.parse(localStorage.getItem("presets")||"[]");
-  presets.forEach((p, i) => {
-    const div = document.createElement("div");
-    div.className = "saved-item";
-    const b = document.createElement("button");
-    b.style.background = p.color;
-    b.innerText = `${p.title} (${p.focus}/${p.break}분)`;
-    b.onclick = () => {
-      document.getElementById("title").innerText = p.title;
-      color = p.color;
-      total = p.focus * 60;
-      currentBreakTime = p.break;
+  JSON.parse(localStorage.getItem("presets")||"[]").forEach((p,i)=>{
+    const div=document.createElement("div");
+    div.style.marginBottom="2px";
+    const b=document.createElement("button");
+    b.style.background=p.color;
+    b.innerText=p.title;
+    b.onclick=()=>{
+      title.innerText=p.title;
+      color=p.color;
+      total=p.focus*60;
       reset();
     };
-    const d = document.createElement("button");
-    d.innerText = "X";
-    d.onclick = () => {
-      presets.splice(i, 1);
-      localStorage.setItem("presets", JSON.stringify(presets));
+    const d=document.createElement("button");
+    d.innerText="X";
+    d.onclick=()=>{
+      const arr=JSON.parse(localStorage.getItem("presets"));
+      arr.splice(i,1);
+      localStorage.setItem("presets",JSON.stringify(arr));
       renderPresets();
     };
-    div.append(b, d);
-    savedList.append(div);
+    div.appendChild(b);
+    div.appendChild(d);
+    savedList.appendChild(div);
   });
 }
 
+// ===== 누적 집중 기록 =====
 function renderStats(){
   stats.innerHTML="";
-  const entries = Object.entries(focusStats);
-  if(!entries.length) { stats.innerHTML = "<center>기록 없음</center>"; return; }
-  const max = Math.max(...entries.map(e => e[1]));
-  entries.forEach(([name, min]) => {
-    const presets = JSON.parse(localStorage.getItem("presets")||"[]");
-    const pColor = presets.find(p=>p.title===name)?.color || "#adb5bd";
-    stats.innerHTML += `
-      <div class="stat-row">
-        <div class="stat-name">${name}</div>
-        <div class="stat-bar"><div class="stat-fill" style="width:${(min/max)*100}%; background:${pColor}"></div></div>
-        <div class="stat-time">${min}분</div>
-      </div>`;
+  const entries=Object.entries(focusStats);
+  if(entries.length===0){
+    stats.innerHTML='<div class="no-stats">집중기록 없음</div>';
+    return;
+  }
+  const max=Math.max(...entries.map(e=>e[1]));
+  entries.forEach(([name, min])=>{
+    const colorVal = JSON.parse(localStorage.getItem("presets")||"[]").find(p=>p.title===name)?.color || "#adb5bd";
+    const row=document.createElement("div");
+    row.className="stat-row";
+    row.innerHTML=`
+      <div class="stat-name">${name}</div>
+      <div class="stat-bar">
+        <div class="stat-fill" style="width:${(min/max)*100}%;background:${colorVal}"></div>
+      </div>
+      <div class="stat-time">${min}분</div>`;
+    stats.appendChild(row);
   });
 }
 
-function clearStats(){ if(confirm("기록을 지울까요?")) { focusStats={}; localStorage.removeItem("focusStats"); renderStats(); } }
+// ===== 누적 기록 초기화 =====
+function clearStats(){
+  focusStats={};
+  localStorage.removeItem("focusStats");
+  renderStats();
+}
+
+// ===== 타이틀 입력 시 반영 =====
+document.getElementById("saveTitle").oninput=()=>document.getElementById("title").innerText=document.getElementById("saveTitle").value;
 
 renderPresets();
 renderStats();
