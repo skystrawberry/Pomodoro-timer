@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>Notion Pomodoro</title>
+<title>Notion Pomodoro Smooth</title>
 <style>
 @font-face {
   font-family: 'KyoboHandwriting2019';
@@ -38,6 +38,7 @@ svg { transform: rotate(-90deg); }
   stroke-width:10; 
   stroke-dasharray:408.4; 
   stroke-dashoffset:408.4; 
+  /* 부드러운 움직임을 위한 핵심 설정 */
   transition: stroke-dashoffset 0.1s linear, stroke 0.3s; 
   stroke-linecap: round;
 }
@@ -88,15 +89,16 @@ button {
   text-align: left;
 }
 
-.popup input {
+/* 입력창 줄바꿈을 위한 스타일 */
+.input-row { margin-bottom: 8px; }
+.input-row label { display: inline-block; width: 35px; }
+.popup input[type="number"] {
   width: 65px;
-  margin: 5px 0;
   padding: 4px;
   border: 1px solid #ddd;
   border-radius: 4px;
 }
-
-#saveTitle { width: 85%; }
+#saveTitle { width: 100%; margin-bottom: 10px; }
 
 .saved { 
   margin-top: 15px; 
@@ -124,9 +126,9 @@ button {
 }
 
 .stat-row { display:flex; align-items:center; margin-bottom:6px; }
-.stat-name { width:50px; white-space: nowrap; overflow: hidden; font-size: 11px; }
-.stat-bar { flex:1; height:8px; background:#e9ecef; border-radius:5px; margin:0 8px; position:relative; }
-.stat-fill { height:100%; border-radius:5px; transition: width 0.3s ease; }
+.stat-name { width:50px; font-size: 11px; }
+.stat-bar { flex:1; height:8px; background:#e9ecef; border-radius:4px; margin:0 8px; }
+.stat-fill { height:100%; border-radius:4px; transition: width 0.3s ease; }
 .stat-time { width:30px; font-size:10px; text-align:right; }
 </style>
 </head>
@@ -159,11 +161,11 @@ button {
     </div>
 
     <div class="popup" id="popup">
-      <input id="saveTitle" placeholder="타이머 제목"><br>
-      집중 <input id="saveFocus" type="number" value="25">분 / 
-      휴식 <input id="saveBreak" type="number" value="5">분<br>
-      <input id="saveColor" type="color" value="#ff6b6b" style="width:100%; height:25px; border:none; padding:0; margin-top:5px;"><br>
-      <button onclick="savePreset()" style="width:100%; background:#4dabf7; color:white; margin-top:8px;">저장하기</button>
+      <input id="saveTitle" placeholder="타이머 제목">
+      <div class="input-row"><label>집중</label> <input id="saveFocus" type="number" value="25"> 분</div>
+      <div class="input-row"><label>휴식</label> <input id="saveBreak" type="number" value="5"> 분</div>
+      <input id="saveColor" type="color" value="#ff6b6b" style="width:100%; height:25px; border:none; padding:0; cursor:pointer;">
+      <button onclick="savePreset()" style="width:100%; background:#4dabf7; color:white; margin-top:10px;">저장하기</button>
     </div>
 
     <div class="stats-popup" id="statsPopup">
@@ -178,59 +180,62 @@ button {
 </div>
 
 <script>
-const CIRC = 2 * Math.PI * 65; 
+const CIRC = 408.4; 
 const BREAK_COLOR = "#a29bfe"; 
-let mode="focus", interval=null, total=0, elapsed=0, userColor="#ff6b6b";
-let currentFocus = 0, currentBreak = 0;
+let mode="focus", interval=null, total=0, elapsedSec=0, userColor="#ff6b6b";
+let currentFocusMin = 0, currentBreakMin = 0;
 let focusStats = JSON.parse(localStorage.getItem("focusStats")||"{}");
 
-function update(){
-  const m = Math.floor(elapsed / 60).toString().padStart(2,'0');
-  const s = (elapsed % 60).toString().padStart(2,'0');
+function updateUI() {
+  // 시간 표시 (카운트업)
+  const m = Math.floor(elapsedSec / 60).toString().padStart(2,'0');
+  const s = Math.floor(elapsedSec % 60).toString().padStart(2,'0');
   document.getElementById("time").innerText = m + ":" + s;
   
+  // 테두리 업데이트
   const prg = document.getElementById("prg");
   prg.style.stroke = (mode === "focus") ? userColor : BREAK_COLOR;
   
-  if (total === 0) {
+  if (total <= 0) {
     prg.style.strokeDashoffset = CIRC;
   } else {
-    const offset = CIRC * (1 - elapsed / total);
+    // 테두리는 진행률에 맞춰 서서히 채워짐
+    const offset = CIRC * (1 - (elapsedSec / total));
     prg.style.strokeDashoffset = offset;
   }
 }
 
-function start(){
-  if(interval || total === 0) return;
+function start() {
+  if (interval || total === 0) return;
   document.getElementById("mode").innerText = mode === "focus" ? "집중 중" : "휴식 중";
-  
+
+  // 0.1초마다 실행하여 부드러운 움직임 구현
   interval = setInterval(() => {
-    elapsed++;
-    update();
+    elapsedSec += 0.1; 
+    updateUI();
     
-    if(elapsed >= total){
-      if(mode === "focus"){
+    if (elapsedSec >= total) {
+      if (mode === "focus") {
         const t = document.getElementById("title").innerText;
-        focusStats[t] = (focusStats[t]||0) + Math.floor(total/60);
+        focusStats[t] = (focusStats[t] || 0) + Math.floor(total / 60);
         localStorage.setItem("focusStats", JSON.stringify(focusStats));
         renderStats();
         
         mode = "break";
-        total = currentBreak * 60;
-        elapsed = 0;
+        total = currentBreakMin * 60;
+        elapsedSec = 0;
       } else {
         mode = "focus";
-        total = currentFocus * 60;
-        elapsed = 0;
+        total = currentFocusMin * 60;
+        elapsedSec = 0;
       }
       document.getElementById("mode").innerText = mode === "focus" ? "집중 중" : "휴식 중";
-      update();
     }
-  }, 1000);
+  }, 100); 
 }
 
-function pause(){ clearInterval(interval); interval=null; document.getElementById("mode").innerText = "일시정지"; }
-function reset(){ pause(); elapsed=0; mode="focus"; document.getElementById("mode").innerText = "대기 중"; update(); }
+function pause() { clearInterval(interval); interval = null; document.getElementById("mode").innerText = "일시정지"; }
+function reset() { pause(); elapsedSec = 0; mode = "focus"; document.getElementById("mode").innerText = "대기 중"; updateUI(); }
 
 function togglePopup(){ 
   statsPopup.style.display = "none";
@@ -267,9 +272,9 @@ function renderPresets(){
     b.onclick = () => {
       document.getElementById("title").innerText = p.title;
       userColor = p.color;
-      currentFocus = p.focus;
-      currentBreak = p.break;
-      total = currentFocus * 60;
+      currentFocusMin = p.focus;
+      currentBreakMin = p.break;
+      total = currentFocusMin * 60;
       reset();
     };
     const d = document.createElement("button");
@@ -278,7 +283,7 @@ function renderPresets(){
       presets.splice(i, 1);
       localStorage.setItem("presets", JSON.stringify(presets));
       renderPresets();
-      renderStats(); // 기록 색상 갱신을 위해 호출
+      renderStats();
     };
     div.append(b, d);
     savedList.append(div);
@@ -290,15 +295,11 @@ function renderStats(){
   statsDiv.innerHTML="";
   const entries = Object.entries(focusStats);
   if(!entries.length) { statsDiv.innerHTML = "<center style='font-size:11px;'>기록 없음</center>"; return; }
-  
   const presets = JSON.parse(localStorage.getItem("presets")||"[]");
   const max = Math.max(...entries.map(e => e[1]));
-  
   entries.forEach(([name, min]) => {
-    // 저장된 프리셋에서 해당 타이머의 색상을 찾음 (없으면 기본 회색)
     const match = presets.find(p => p.title === name);
     const barColor = match ? match.color : "#adb5bd";
-    
     statsDiv.innerHTML += `
       <div class="stat-row">
         <div class="stat-name">${name}</div>
@@ -316,7 +317,7 @@ function clearStats(){
 
 renderPresets();
 renderStats();
-update();
+updateUI();
 </script>
 </body>
 </html>
