@@ -1,233 +1,313 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Mini Pomodoro</title>
+<meta charset="UTF-8">
+<title>Pomodoro</title>
 
 <style>
 @font-face {
   font-family: 'KyoboHandwriting2019';
-  src: local('KyoboHandwriting2019');
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/KyoboHandwriting2019.woff') format('woff');
 }
 
 body {
-  margin: 0;
-  padding: 4px;
-  font-family: 'KyoboHandwriting2019', sans-serif;
-  background: #f7f7f7;
-  box-sizing: border-box;
+  font-family: 'KyoboHandwriting2019', -apple-system;
+  background:#f6f6f6;
+  text-align:center;
+  padding:8px;               /* 🔽 상단 여백 축소 */
 }
 
-/* ===== 카드 ===== */
-.timer-box {
-  width: 100%;
-  max-width: 220px;
-  margin: 0 auto;
-  background: white;
-  border-radius: 12px;
-  padding: 8px;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+/* ================= 타이머 ================= */
+.circle {
+  width:150px;               /* 🔽 기존보다 작게 */
+  height:150px;
+  margin:8px auto;
+  position:relative;
 }
 
-/* ===== 타이머 ===== */
-.timer-circle {
-  width: 110px;
-  height: 110px;
-  margin: 0 auto;
-  border-radius: 50%;
-  background: var(--timer-color, #82C6E2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 14px;
-  text-align: center;
+svg { transform: rotate(-90deg); }
+
+.bg {
+  fill:none;
+  stroke:#e9ecef;
+  stroke-width:10;
 }
 
-.timer-circle strong {
-  font-size: 16px;
+.progress {
+  fill:none;
+  stroke-width:10;
+  stroke-dasharray:440;
+  stroke-dashoffset:440;
+  transition:stroke-dashoffset 1s linear, stroke 0.3s;
 }
 
-/* ===== 버튼 ===== */
-.controls {
-  display: flex;
-  gap: 4px;
-  margin-top: 6px;
+.center {
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
 }
 
+.title {
+  font-size:13px;
+  margin-bottom:2px;
+}
+
+.time {
+  font-size:26px;
+}
+
+.mode {
+  font-size:12px;
+}
+
+/* ================= 버튼 ================= */
 button {
-  flex: 1;
   font-family: 'KyoboHandwriting2019';
-  border: none;
-  border-radius: 6px;
-  padding: 4px 0;
-  font-size: 12px;
-  cursor: pointer;
+  border:none;
+  border-radius:6px;
+  padding:4px 6px;
+  margin:2px;
+  font-size:12px;
+  cursor:pointer;
 }
 
-.start-btn { background: #51cf66; color: white; }
-.stop-btn { background: #ff6b6b; color: white; }
-.save-btn { background: #74c0fc; color: white; }
+.start { background:#ff6b6b; color:white; }
+.pause { background:#4dabf7; color:white; }
+.reset { background:#868e96; color:white; }
 
-/* ===== 누적 기록 ===== */
+.toggle {
+  margin-top:6px;
+  background:#dee2e6;
+}
+
+/* ================= 저장 팝업 ================= */
+.popup {
+  display:none;
+  margin-top:6px;
+  padding:8px;
+  background:white;
+  border-radius:8px;
+  font-size:12px;
+}
+
+/* ================= 저장된 타이머 ================= */
+.saved {
+  margin-top:10px;
+  text-align:left;
+  font-size:12px;
+}
+
+.saved div {
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:4px;
+}
+
+.saved div button:first-child {
+  flex:1;
+}
+
+.saved div button:last-child {
+  background:#adb5bd;
+  color:white;
+  margin-left:4px;
+}
+
+/* ================= 누적 집중 기록 ================= */
 .stats {
-  margin-top: 6px;
-  font-size: 11px;
+  margin-top:10px;
+  font-size:12px;
 }
 
 .stat-row {
-  display: flex;
-  align-items: center;
-  margin-bottom: 4px;
+  display:flex;
+  align-items:center;
+  margin-bottom:6px;
 }
 
 .stat-name {
-  width: 52px;
+  width:50px;
 }
 
 .stat-bar {
-  flex: 1;
-  height: 8px;
-  background: #e9ecef;
-  border-radius: 6px;
-  overflow: hidden;
-  margin: 0 4px;
+  flex:1;
+  height:8px;
+  background:#e9ecef;
+  border-radius:6px;
+  overflow:hidden;
+  margin:0 6px;
 }
 
 .stat-fill {
-  height: 100%;
-  background: var(--timer-color);
+  height:100%;
 }
 
 .stat-time {
-  width: 30px;
-  text-align: right;
-  font-size: 10px;
+  width:36px;
+  font-size:11px;
+  text-align:right;
 }
 
 .no-stats {
-  color: #868e96;
-  text-align: center;
-  font-size: 11px;
+  text-align:center;
+  color:#868e96;
 }
 
-/* ===== 리셋 ===== */
 .clear-btn {
-  width: 100%;
-  margin-top: 4px;
-  background: #ff8787;
-  color: white;
-  padding: 4px 0;
-  font-size: 11px;
-  border-radius: 6px;
+  width:100%;
+  margin-top:6px;
+  background:#ff8787;
+  color:white;
+  font-size:11px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="timer-box">
-  <div class="timer-circle" id="timerCircle">
-    <span>뽀모도로<br><strong id="timeText">25:00</strong></span>
-  </div>
+<h3 style="margin:4px 0;">🍅 Pomodoro</h3>
 
-  <div class="controls">
-    <button class="start-btn" onclick="startTimer()">시작</button>
-    <button class="stop-btn" onclick="stopTimer()">정지</button>
-    <button class="save-btn" onclick="saveSession()">저장</button>
-  </div>
-
-  <div class="stats" id="statsArea"></div>
-
-  <button class="clear-btn" onclick="clearStats()">누적 기록 초기화</button>
+<div class="circle">
+<svg width="150" height="150">
+  <circle class="bg" cx="75" cy="75" r="70"></circle>
+  <circle class="progress" cx="75" cy="75" r="70"></circle>
+</svg>
+<div class="center">
+  <div class="title" id="title">타이머</div>
+  <div class="time" id="time">25:00</div>
+  <div class="mode" id="mode">대기 중</div>
+</div>
 </div>
 
+<button class="start" onclick="start()">Start</button>
+<button class="pause" onclick="pause()">Pause</button>
+<button class="reset" onclick="reset()">Reset</button>
+
+<button class="toggle" onclick="togglePopup()">타이머 저장 ▼</button>
+
+<div class="popup" id="popup">
+  <input id="saveTitle" placeholder="타이머 제목"><br>
+  집중 <input id="saveFocus" type="number" value="25" style="width:50px"> 분<br>
+  휴식 <input id="saveBreak" type="number" value="5" style="width:50px"> 분<br>
+  색상 <input id="saveColor" value="#ff6b6b"><br>
+  <button onclick="savePreset()">타이머 저장</button>
+</div>
+
+<div class="saved">
+  <b>저장된 타이머</b>
+  <div id="savedList"></div>
+</div>
+
+<div class="stats" id="stats"></div>
+<button class="clear-btn" onclick="clearStats()">누적 기록 초기화</button>
+
 <script>
-let timer;
-let seconds = 1500;
-let running = false;
+const CIRC = 2*Math.PI*70;
+let mode="focus", interval=null, total=1500, elapsed=0;
+let color="#ff6b6b";
+let stats = JSON.parse(localStorage.getItem("focusStats")||"{}");
 
-let timers = {
-  "뽀모도로": { color: "#82C6E2" }
-};
+function update(){
+  document.getElementById("time").innerText =
+    String(Math.floor(elapsed/60)).padStart(2,'0')+":"+
+    String(elapsed%60).padStart(2,'0');
 
-let focusStats = JSON.parse(localStorage.getItem("focusStats")) || {};
-
-function updateDisplay() {
-  const m = String(Math.floor(seconds / 60)).padStart(2,'0');
-  const s = String(seconds % 60).padStart(2,'0');
-  document.getElementById("timeText").innerText = `${m}:${s}`;
+  document.querySelector(".progress").style.stroke=color;
+  document.querySelector(".progress").style.strokeDashoffset =
+    CIRC*(1-elapsed/total);
 }
 
-function startTimer() {
-  if (running) return;
-  running = true;
-  timer = setInterval(() => {
-    if (seconds > 0) {
-      seconds--;
-      updateDisplay();
-    } else {
-      stopTimer();
+function start(){
+  if(interval) return;
+  interval=setInterval(()=>{
+    elapsed++;
+    update();
+    if(elapsed>=total){
+      pause();
+      stats[title.innerText]=(stats[title.innerText]||0)+Math.round(total/60);
+      localStorage.setItem("focusStats",JSON.stringify(stats));
+      renderStats();
+      reset();
     }
-  }, 1000);
+  },1000);
 }
 
-function stopTimer() {
-  running = false;
-  clearInterval(timer);
+function pause(){ clearInterval(interval); interval=null; }
+function reset(){ pause(); elapsed=0; update(); }
+
+function togglePopup(){
+  popup.style.display = popup.style.display==="block"?"none":"block";
 }
 
-function saveSession() {
-  const name = "뽀모도로";
-  const minutes = Math.round((1500 - seconds) / 60);
-  if (minutes <= 0) return;
-
-  focusStats[name] = (focusStats[name] || 0) + minutes;
-  localStorage.setItem("focusStats", JSON.stringify(focusStats));
-
-  seconds = 1500;
-  updateDisplay();
-  renderStats();
+function savePreset(){
+  const presets = JSON.parse(localStorage.getItem("presets")||"[]");
+  presets.push({
+    title: saveTitle.value,
+    focus: saveFocus.value,
+    break: saveBreak.value,
+    color: saveColor.value
+  });
+  localStorage.setItem("presets",JSON.stringify(presets));
+  renderPresets();
 }
 
-function renderStats() {
-  const area = document.getElementById("statsArea");
-  area.innerHTML = "";
-
-  const entries = Object.entries(focusStats);
-  if (entries.length === 0) {
-    area.innerHTML = `<div class="no-stats">집중기록 없음</div>`;
-    return;
-  }
-
-  const max = Math.max(...entries.map(e => e[1]));
-
-  entries.forEach(([name, min]) => {
-    const color = timers[name]?.color || "#adb5bd";
-    const percent = (min / max) * 100;
-
-    const row = document.createElement("div");
-    row.className = "stat-row";
-    row.innerHTML = `
-      <div class="stat-name">${name}</div>
-      <div class="stat-bar">
-        <div class="stat-fill" style="width:${percent}%; background:${color}"></div>
-      </div>
-      <div class="stat-time">${min}분</div>
-    `;
-    area.appendChild(row);
+function renderPresets(){
+  savedList.innerHTML="";
+  JSON.parse(localStorage.getItem("presets")||"[]").forEach((p,i)=>{
+    const div=document.createElement("div");
+    const b=document.createElement("button");
+    b.style.background=p.color;
+    b.innerText=p.title;
+    b.onclick=()=>{
+      title.innerText=p.title;
+      color=p.color;
+      total=p.focus*60;
+      reset();
+    };
+    const d=document.createElement("button");
+    d.innerText="X";
+    d.onclick=()=>{
+      const arr=JSON.parse(localStorage.getItem("presets"));
+      arr.splice(i,1);
+      localStorage.setItem("presets",JSON.stringify(arr));
+      renderPresets();
+    };
+    div.append(b,d);
+    savedList.appendChild(div);
   });
 }
 
-function clearStats() {
-  focusStats = {};
+function renderStats(){
+  statsDiv.innerHTML="";
+  const entries=Object.entries(stats);
+  if(!entries.length){
+    statsDiv.innerHTML='<div class="no-stats">집중기록 없음</div>';
+    return;
+  }
+  const max=Math.max(...entries.map(e=>e[1]));
+  entries.forEach(([k,v])=>{
+    const row=document.createElement("div");
+    row.className="stat-row";
+    row.innerHTML=`
+      <div class="stat-name">${k}</div>
+      <div class="stat-bar">
+        <div class="stat-fill" style="width:${(v/max)*100}%;background:${color}"></div>
+      </div>
+      <div class="stat-time">${v}분</div>`;
+    statsDiv.appendChild(row);
+  });
+}
+
+function clearStats(){
   localStorage.removeItem("focusStats");
+  stats={};
   renderStats();
 }
 
+renderPresets();
 renderStats();
-updateDisplay();
+update();
 </script>
 
 </body>
