@@ -2,8 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>Pomodoro</title>
-
+<title>Mini Pomodoro</title>
 <style>
 @font-face {
   font-family: 'KyoboHandwriting2019';
@@ -14,32 +13,21 @@ body {
   font-family: 'KyoboHandwriting2019', -apple-system;
   background:#f6f6f6;
   text-align:center;
-  padding:8px;               /* 🔽 상단 여백 축소 */
+  padding:6px;  /* 상단 여백 최소화 */
 }
 
-/* ================= 타이머 ================= */
+/* ===== 타이머 ===== */
 .circle {
-  width:150px;               /* 🔽 기존보다 작게 */
-  height:150px;
-  margin:8px auto;
+  width:140px;
+  height:140px;
+  margin:6px auto;
   position:relative;
 }
 
 svg { transform: rotate(-90deg); }
 
-.bg {
-  fill:none;
-  stroke:#e9ecef;
-  stroke-width:10;
-}
-
-.progress {
-  fill:none;
-  stroke-width:10;
-  stroke-dasharray:440;
-  stroke-dashoffset:440;
-  transition:stroke-dashoffset 1s linear, stroke 0.3s;
-}
+.bg { fill:none; stroke:#e9ecef; stroke-width:10; }
+.progress { fill:none; stroke-width:10; stroke-dasharray:440; stroke-dashoffset:440; transition:stroke-dashoffset 1s linear, stroke 0.3s; }
 
 .center {
   position:absolute;
@@ -48,25 +36,16 @@ svg { transform: rotate(-90deg); }
   transform:translate(-50%,-50%);
 }
 
-.title {
-  font-size:13px;
-  margin-bottom:2px;
-}
+.title { font-size:13px; margin-bottom:2px; }
+.time { font-size:24px; }
+.mode { font-size:12px; }
 
-.time {
-  font-size:26px;
-}
-
-.mode {
-  font-size:12px;
-}
-
-/* ================= 버튼 ================= */
+/* ===== 버튼 ===== */
 button {
   font-family: 'KyoboHandwriting2019';
   border:none;
   border-radius:6px;
-  padding:4px 6px;
+  padding:3px 5px;
   margin:2px;
   font-size:12px;
   cursor:pointer;
@@ -75,103 +54,44 @@ button {
 .start { background:#ff6b6b; color:white; }
 .pause { background:#4dabf7; color:white; }
 .reset { background:#868e96; color:white; }
+.toggle { margin-top:4px; background:#dee2e6; }
 
-.toggle {
-  margin-top:6px;
-  background:#dee2e6;
-}
-
-/* ================= 저장 팝업 ================= */
+/* ===== 저장 팝업 ===== */
 .popup {
   display:none;
-  margin-top:6px;
-  padding:8px;
+  margin-top:4px;
+  padding:6px;
   background:white;
   border-radius:8px;
   font-size:12px;
 }
 
-/* ================= 저장된 타이머 ================= */
-.saved {
-  margin-top:10px;
-  text-align:left;
-  font-size:12px;
-}
+/* ===== 저장된 타이머 ===== */
+.saved { margin-top:8px; text-align:left; font-size:12px; }
+.saved div { display:flex; justify-content:space-between; margin-bottom:4px; }
+.saved div button:first-child { flex:1; }
+.saved div button:last-child { background:#adb5bd; color:white; margin-left:4px; }
 
-.saved div {
-  display:flex;
-  justify-content:space-between;
-  margin-bottom:4px;
-}
+/* ===== 누적 집중 기록 ===== */
+.stats { margin-top:6px; font-size:12px; }
+.stat-row { display:flex; align-items:center; margin-bottom:4px; }
+.stat-name { width:50px; }
+.stat-bar { flex:1; height:8px; background:#e9ecef; border-radius:6px; overflow:hidden; margin:0 4px; }
+.stat-fill { height:100%; }
+.stat-time { width:30px; font-size:11px; text-align:right; }
+.no-stats { text-align:center; color:#868e96; }
 
-.saved div button:first-child {
-  flex:1;
-}
-
-.saved div button:last-child {
-  background:#adb5bd;
-  color:white;
-  margin-left:4px;
-}
-
-/* ================= 누적 집중 기록 ================= */
-.stats {
-  margin-top:10px;
-  font-size:12px;
-}
-
-.stat-row {
-  display:flex;
-  align-items:center;
-  margin-bottom:6px;
-}
-
-.stat-name {
-  width:50px;
-}
-
-.stat-bar {
-  flex:1;
-  height:8px;
-  background:#e9ecef;
-  border-radius:6px;
-  overflow:hidden;
-  margin:0 6px;
-}
-
-.stat-fill {
-  height:100%;
-}
-
-.stat-time {
-  width:36px;
-  font-size:11px;
-  text-align:right;
-}
-
-.no-stats {
-  text-align:center;
-  color:#868e96;
-}
-
-.clear-btn {
-  width:100%;
-  margin-top:6px;
-  background:#ff8787;
-  color:white;
-  font-size:11px;
-}
+.clear-btn { width:100%; margin-top:4px; background:#ff8787; color:white; font-size:11px; padding:3px 0; border-radius:6px; }
 </style>
 </head>
-
 <body>
 
-<h3 style="margin:4px 0;">🍅 Pomodoro</h3>
+<h3 style="margin:2px 0;">🍅 Pomodoro</h3>
 
 <div class="circle">
-<svg width="150" height="150">
-  <circle class="bg" cx="75" cy="75" r="70"></circle>
-  <circle class="progress" cx="75" cy="75" r="70"></circle>
+<svg width="140" height="140">
+  <circle class="bg" cx="70" cy="70" r="65"></circle>
+  <circle class="progress" cx="70" cy="70" r="65"></circle>
 </svg>
 <div class="center">
   <div class="title" id="title">타이머</div>
@@ -180,16 +100,18 @@ button {
 </div>
 </div>
 
-<button class="start" onclick="start()">Start</button>
-<button class="pause" onclick="pause()">Pause</button>
-<button class="reset" onclick="reset()">Reset</button>
+<div>
+  <button class="start" onclick="start()">Start</button>
+  <button class="pause" onclick="pause()">Pause</button>
+  <button class="reset" onclick="reset()">Reset</button>
+</div>
 
 <button class="toggle" onclick="togglePopup()">타이머 저장 ▼</button>
 
 <div class="popup" id="popup">
   <input id="saveTitle" placeholder="타이머 제목"><br>
-  집중 <input id="saveFocus" type="number" value="25" style="width:50px"> 분<br>
-  휴식 <input id="saveBreak" type="number" value="5" style="width:50px"> 분<br>
+  집중 <input id="saveFocus" type="number" min="1" max="60" value="25" style="width:50px">분<br>
+  휴식 <input id="saveBreak" type="number" min="1" max="60" value="5" style="width:50px">분<br>
   색상 <input id="saveColor" value="#ff6b6b"><br>
   <button onclick="savePreset()">타이머 저장</button>
 </div>
@@ -203,21 +125,21 @@ button {
 <button class="clear-btn" onclick="clearStats()">누적 기록 초기화</button>
 
 <script>
-const CIRC = 2*Math.PI*70;
-let mode="focus", interval=null, total=1500, elapsed=0;
-let color="#ff6b6b";
-let stats = JSON.parse(localStorage.getItem("focusStats")||"{}");
+const CIRC = 2*Math.PI*65;
+let mode="focus", interval=null, total=1500, elapsed=0, color="#ff6b6b";
+let focusStats = JSON.parse(localStorage.getItem("focusStats")||"{}");
 
+// ===== UI 업데이트 =====
 function update(){
-  document.getElementById("time").innerText =
-    String(Math.floor(elapsed/60)).padStart(2,'0')+":"+
-    String(elapsed%60).padStart(2,'0');
-
+  const m=Math.floor(elapsed/60).toString().padStart(2,'0');
+  const s=(elapsed%60).toString().padStart(2,'0');
+  document.getElementById("time").innerText = m+":"+s;
+  document.getElementById("mode").innerText = mode==="focus"?"집중 중":"휴식 중";
   document.querySelector(".progress").style.stroke=color;
-  document.querySelector(".progress").style.strokeDashoffset =
-    CIRC*(1-elapsed/total);
+  document.querySelector(".progress").style.strokeDashoffset = CIRC*(1-elapsed/total);
 }
 
+// ===== 타이머 기능 =====
 function start(){
   if(interval) return;
   interval=setInterval(()=>{
@@ -225,21 +147,23 @@ function start(){
     update();
     if(elapsed>=total){
       pause();
-      stats[title.innerText]=(stats[title.innerText]||0)+Math.round(total/60);
-      localStorage.setItem("focusStats",JSON.stringify(stats));
+      const t = document.getElementById("title").innerText;
+      focusStats[t] = (focusStats[t]||0) + Math.round(total/60);
+      localStorage.setItem("focusStats",JSON.stringify(focusStats));
       renderStats();
       reset();
     }
   },1000);
 }
-
 function pause(){ clearInterval(interval); interval=null; }
 function reset(){ pause(); elapsed=0; update(); }
 
+// ===== 팝업 토글 =====
 function togglePopup(){
   popup.style.display = popup.style.display==="block"?"none":"block";
 }
 
+// ===== 저장된 타이머 =====
 function savePreset(){
   const presets = JSON.parse(localStorage.getItem("presets")||"[]");
   presets.push({
@@ -273,42 +197,47 @@ function renderPresets(){
       localStorage.setItem("presets",JSON.stringify(arr));
       renderPresets();
     };
-    div.append(b,d);
+    div.appendChild(b);
+    div.appendChild(d);
     savedList.appendChild(div);
   });
 }
 
+// ===== 누적 집중 기록 =====
 function renderStats(){
-  statsDiv.innerHTML="";
-  const entries=Object.entries(stats);
-  if(!entries.length){
-    statsDiv.innerHTML='<div class="no-stats">집중기록 없음</div>';
+  stats.innerHTML="";
+  const entries=Object.entries(focusStats);
+  if(entries.length===0){
+    stats.innerHTML='<div class="no-stats">집중기록 없음</div>';
     return;
   }
   const max=Math.max(...entries.map(e=>e[1]));
-  entries.forEach(([k,v])=>{
+  entries.forEach(([name, min])=>{
+    const colorVal = JSON.parse(localStorage.getItem("presets")||"[]").find(p=>p.title===name)?.color || "#adb5bd";
     const row=document.createElement("div");
     row.className="stat-row";
     row.innerHTML=`
-      <div class="stat-name">${k}</div>
+      <div class="stat-name">${name}</div>
       <div class="stat-bar">
-        <div class="stat-fill" style="width:${(v/max)*100}%;background:${color}"></div>
+        <div class="stat-fill" style="width:${(min/max)*100}%;background:${colorVal}"></div>
       </div>
-      <div class="stat-time">${v}분</div>`;
-    statsDiv.appendChild(row);
+      <div class="stat-time">${min}분</div>`;
+    stats.appendChild(row);
   });
 }
 
+// ===== 누적 기록 초기화 =====
 function clearStats(){
+  focusStats={};
   localStorage.removeItem("focusStats");
-  stats={};
   renderStats();
 }
+
+document.getElementById("saveTitle").oninput=()=>document.getElementById("title").innerText=document.getElementById("saveTitle").value;
 
 renderPresets();
 renderStats();
 update();
 </script>
-
 </body>
 </html>
