@@ -9,8 +9,12 @@
   src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/KyoboHandwriting2019.woff') format('woff');
 }
 
+/* 모든 요소에 폰트 강제 적용 */
+* {
+  font-family: 'KyoboHandwriting2019', sans-serif !important;
+}
+
 body {
-  font-family: 'KyoboHandwriting2019', -apple-system;
   background:#f6f6f6;
   text-align:center;
   padding:20px;
@@ -33,8 +37,8 @@ svg { transform: rotate(-90deg); }
 .progress { 
   fill:none; 
   stroke-width:10; 
-  stroke-dasharray:408.4; /* 2 * PI * 65 */
-  stroke-dashoffset:408.4; /* 초기값: 완전히 비어있음 */
+  stroke-dasharray:408.4; 
+  stroke-dashoffset:408.4; 
   transition:stroke-dashoffset 0.5s linear, stroke 0.3s; 
   stroke-linecap: round;
 }
@@ -55,9 +59,8 @@ svg { transform: rotate(-90deg); }
 .container { width: 220px; }
 
 button {
-  font-family: 'KyoboHandwriting2019';
   border:none;
-  border-radius:8px;
+  border-radius:8 :px;
   padding:6px 10px;
   margin:3px;
   font-size:14px;
@@ -89,19 +92,27 @@ button {
 }
 
 .popup input {
-  font-family: 'KyoboHandwriting2019';
-  width: 85%;
+  width: 80%;
   margin: 5px 0;
   padding: 4px;
   border: 1px solid #ddd;
   border-radius: 4px;
+  font-size: 13px;
 }
 
-/* ===== 저장된 타이머 리스트 (정렬 수정) ===== */
+/* 컬러 피커 스타일 */
+input[type="color"] {
+  width: 100% !important;
+  height: 30px;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+/* ===== 저장된 타이머 리스트 ===== */
 .saved { 
   margin-top: 20px; 
   width: 100%;
-  text-align: left;
 }
 .saved b { display: block; margin-bottom: 8px; font-size: 14px; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
 .saved-item { 
@@ -160,9 +171,10 @@ button {
     </div>
 
     <div class="popup" id="popup">
-      <input id="saveTitle" placeholder="타이머 제목"><br>
-      집중 <input id="saveFocus" type="number" value="25">분<br>
-      색상 <input id="saveColor" type="color" value="#ff6b6b" style="height:30px; padding:0; border:none;"><br>
+      이름: <input id="saveTitle" placeholder="예: 코딩, 독서"><br>
+      집중: <input id="saveFocus" type="number" value="25">분<br>
+      휴식: <input id="saveBreak" type="number" value="5">분<br>
+      색상: <input id="saveColor" type="color" value="#ff6b6b"><br>
       <button onclick="savePreset()" style="width:100%; background:#4dabf7; color:white; margin-top:5px;">저장하기</button>
     </div>
 
@@ -180,20 +192,19 @@ button {
 <script>
 const CIRC = 2 * Math.PI * 65; 
 let mode="focus", interval=null, total=0, elapsed=0, color="#ff6b6b";
+let currentBreakTime = 0; // 현재 선택된 타이머의 휴식 시간 저장
 let focusStats = JSON.parse(localStorage.getItem("focusStats")||"{}");
 
-// ===== UI 업데이트 (진행바 초기화 수정 핵심) =====
 function update(){
   const remain = total - elapsed;
   const m = Math.floor(Math.max(0, remain) / 60).toString().padStart(2,'0');
   const s = (Math.max(0, remain) % 60).toString().padStart(2,'0');
-  
   document.getElementById("time").innerText = m + ":" + s;
   
   const prg = document.getElementById("prg");
   prg.style.stroke = color;
   
-  // 핵심 수정: total이 0이거나 elapsed가 0이면 offset을 최대치(비어있음)로 설정
+  // 시작 전(elapsed=0)에는 게이지가 안 보이게 설정
   if (total === 0 || elapsed === 0) {
     prg.style.strokeDashoffset = CIRC;
   } else {
@@ -202,37 +213,52 @@ function update(){
   }
 }
 
-// ===== 타이머 기능 =====
 function start(){
   if(interval || total === 0) return;
-  document.getElementById("mode").innerText = "집중 중";
+  document.getElementById("mode").innerText = mode === "focus" ? "집중 중" : "휴식 중";
   interval = setInterval(() => {
     elapsed++;
     update();
     if(elapsed >= total){
       pause();
-      const t = document.getElementById("title").innerText;
-      focusStats[t] = (focusStats[t]||0) + Math.floor(total/60);
-      localStorage.setItem("focusStats", JSON.stringify(focusStats));
-      renderStats();
-      alert("집중 완료!");
-      reset();
+      if(mode === "focus") {
+        const t = document.getElementById("title").innerText;
+        focusStats[t] = (focusStats[t]||0) + Math.floor(total/60);
+        localStorage.setItem("focusStats", JSON.stringify(focusStats));
+        renderStats();
+        alert("집중 끝! 휴식을 시작하세요.");
+        // 휴식 모드로 전환
+        mode = "break";
+        total = currentBreakTime * 60;
+        elapsed = 0;
+        update();
+      } else {
+        alert("휴식 끝! 다시 집중해볼까요?");
+        // 다시 초기 타이머로 리셋 (사용자가 수동으로 다시 시작하도록)
+        reset(); 
+      }
     }
   }, 1000);
 }
 
 function pause(){ clearInterval(interval); interval=null; document.getElementById("mode").innerText = "일시정지"; }
-function reset(){ pause(); elapsed=0; document.getElementById("mode").innerText = "대기 중"; update(); }
+function reset(){ 
+  pause(); 
+  elapsed=0; 
+  mode="focus"; 
+  document.getElementById("mode").innerText = "대기 중"; 
+  update(); 
+}
 
 function togglePopup(){ popup.style.display = popup.style.display==="block"?"none":"block"; }
 function toggleStats(){ statsPopup.style.display = statsPopup.style.display==="block"?"none":"block"; }
 
-// ===== 저장/렌더링 =====
 function savePreset(){
   const presets = JSON.parse(localStorage.getItem("presets")||"[]");
   presets.push({
     title: document.getElementById("saveTitle").value || "타이머",
     focus: document.getElementById("saveFocus").value,
+    break: document.getElementById("saveBreak").value,
     color: document.getElementById("saveColor").value
   });
   localStorage.setItem("presets", JSON.stringify(presets));
@@ -249,11 +275,12 @@ function renderPresets(){
     div.className = "saved-item";
     const b = document.createElement("button");
     b.style.background = p.color;
-    b.innerText = `${p.title} (${p.focus}분)`;
+    b.innerText = `${p.title} (${p.focus}/${p.break}분)`;
     b.onclick = () => {
       document.getElementById("title").innerText = p.title;
       color = p.color;
       total = p.focus * 60;
+      currentBreakTime = p.break;
       reset();
     };
     const d = document.createElement("button");
@@ -274,7 +301,8 @@ function renderStats(){
   if(!entries.length) { stats.innerHTML = "<center>기록 없음</center>"; return; }
   const max = Math.max(...entries.map(e => e[1]));
   entries.forEach(([name, min]) => {
-    const pColor = JSON.parse(localStorage.getItem("presets")||"[]").find(p=>p.title===name)?.color || "#adb5bd";
+    const presets = JSON.parse(localStorage.getItem("presets")||"[]");
+    const pColor = presets.find(p=>p.title===name)?.color || "#adb5bd";
     stats.innerHTML += `
       <div class="stat-row">
         <div class="stat-name">${name}</div>
