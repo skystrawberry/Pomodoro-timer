@@ -27,7 +27,7 @@ body {
 svg { transform: rotate(-90deg); }
 
 .bg { fill:none; stroke:#e9ecef; stroke-width:10; }
-.progress { fill:none; stroke-width:10; stroke-dasharray:440; stroke-dashoffset:440; transition:stroke-dashoffset 1s linear, stroke 0.3s; }
+.progress { fill:none; stroke-width:10; stroke-dasharray:440; stroke-dashoffset:440; transition:stroke-dashoffset 0.5s linear, stroke 0.3s; }
 
 .center {
   position:absolute;
@@ -82,7 +82,7 @@ button {
 /* ===== 저장된 타이머 ===== */
 .saved { margin-top:6px; text-align:left; font-size:12px; }
 .saved div { display:flex; justify-content:space-between; margin-bottom:4px; }
-.saved div button:first-child { flex:1; }
+.saved div button:first-child { flex:1; color:white; }
 .saved div button:last-child { background:#adb5bd; color:white; margin-left:4px; }
 
 /* ===== 누적 집중 기록 ===== */
@@ -139,7 +139,7 @@ button {
 </div>
 
 <!-- 저장된 타이머 -->
-<div class="saved">
+<div class="saved" id="savedTimers">
   <b>저장된 타이머</b>
   <div id="savedList"></div>
 </div>
@@ -156,7 +156,8 @@ function update(){
   document.getElementById("time").innerText = m+":"+s;
   document.getElementById("mode").innerText = mode==="focus"?"집중 중":"휴식 중";
   document.querySelector(".progress").style.stroke=color;
-  document.querySelector(".progress").style.strokeDashoffset = CIRC*(1-elapsed/total);
+  const offset = total>0 ? CIRC*(1-elapsed/total) : CIRC;
+  document.querySelector(".progress").style.strokeDashoffset = offset;
 }
 
 // ===== 타이머 기능 =====
@@ -175,6 +176,7 @@ function start(){
     }
   },1000);
 }
+
 function pause(){ clearInterval(interval); interval=null; }
 function reset(){ pause(); elapsed=0; update(); }
 
@@ -196,9 +198,11 @@ function savePreset(){
 }
 
 function renderPresets(){
+  const savedList = document.getElementById("savedList");
   savedList.innerHTML="";
   JSON.parse(localStorage.getItem("presets")||"[]").forEach((p,i)=>{
     const div=document.createElement("div");
+    div.style.marginBottom="2px";
     const b=document.createElement("button");
     b.style.background=p.color;
     b.innerText=p.title;
@@ -252,6 +256,7 @@ function clearStats(){
   renderStats();
 }
 
+// ===== 타이틀 입력 시 반영 =====
 document.getElementById("saveTitle").oninput=()=>document.getElementById("title").innerText=document.getElementById("saveTitle").value;
 
 renderPresets();
